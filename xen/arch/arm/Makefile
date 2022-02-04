@@ -19,6 +19,7 @@ obj-$(CONFIG_DOM0LESS_BOOT) += dom0less-build.init.o
 obj-y += domain.o
 obj-y += domain_build.init.o
 obj-y += domctl.o
+obj-$(CONFIG_HOST_DTB_EXPORT) += host_dtb_export.o
 obj-$(CONFIG_EARLY_PRINTK) += early_printk.o
 obj-y += efi/
 obj-y += gic.o
