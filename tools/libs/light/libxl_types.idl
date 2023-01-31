@@ -553,11 +553,13 @@ libxl_sve_type = Enumeration("sve_type", [
 
 libxl_arm_sci_type = Enumeration("arm_sci_type", [
     (0, "none"),
-    (1, "scmi_smc")
+    (1, "scmi_smc"),
+    (2, "scmi_smc_multiagent")
     ], init_val = "LIBXL_ARM_SCI_TYPE_NONE")
 
 libxl_arm_sci = Struct("arm_sci", [
     ("type", libxl_arm_sci_type),
+    ("agent_id", uint8)
     ])
 
 libxl_rdm_reserve = Struct("rdm_reserve", [
