@@ -24,6 +24,7 @@
 #include <asm/setup.h>
 #include <asm/tee/tee.h>
 #include <asm/pci.h>
+#include <asm/firmware/sci.h>
 #include <asm/platform.h>
 #include <asm/psci.h>
 #include <asm/setup.h>
@@ -1888,6 +1889,9 @@ static int __init handle_node(struct domain *d, struct kernel_info *kinfo,
         return 0;
     }
 
+    if ( sci_dt_handle_node(d, node) )
+        return 0;
+
     /*
      * The vGIC does not support routing hardware PPIs to guest. So
      * we need to skip any node using PPIs.
@@ -1985,6 +1989,10 @@ static int __init handle_node(struct domain *d, struct kernel_info *kinfo,
 
         res = make_memory_node(kinfo, addrcells, sizecells,
                                kernel_info_get_mem(kinfo));
+        if ( res )
+            return res;
+
+        res = sci_dt_finalize(d, kinfo->fdt);
         if ( res )
             return res;
 
