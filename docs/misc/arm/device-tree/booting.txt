@@ -296,6 +296,20 @@ with the following properties:
     Should be used together with dom0_scmi_smc_passthrough Xen command line
     option.
 
+    - "scmi_smc_multiagent"
+
+    Enables ARM SCMI SMC multi-agent support for the guest by enabling SCMI over
+    SMC calls forwarding from domain to the EL3 firmware (like ARM
+    Trusted Firmware-A) with a multi SCMI OSPM agent support.
+    The SCMI agent_id should be specified for the guest with "xen,sci_agent_id"
+    property.
+
+- "xen,sci_agent_id"
+
+    Specifies a non-zero ARM SCI agent id for the guest. This option is
+    mandatory if the SCMI SMC "scmi_smc_multiagent" support is enabled for
+    the guest. The agent ids of guest must be unique and in the range [1..255].
+
 Under the "xen,domain" compatible node, one or more sub-nodes are present
 for the DomU kernel and ramdisk.
 
@@ -764,3 +778,49 @@ The automatically allocated static shared memory will get mapped at
 0x80000000 in DomU1 guest physical address space, and at 0x90000000 in DomU2
 guest physical address space. DomU1 is explicitly defined as the owner domain,
 and DomU2 is the borrower domain.
+
+SCMI SMC multi-agent support
+============================
+
+For enabling the ARM SCMI SMC multi-agent support (enabled by CONFIG_SCMI_SMC_MA)
+the Xen specific SCMI Agent's configuration shell be provided in the Host DT
+according to the SCMI compliant EL3 Firmware specification with
+ARM SMC/HVC transport using property "xen,scmi-secondary-agents" under
+the top-level "chosen" node:
+
+- xen,scmi-secondary-agents
+
+    Defines a set of SCMI agents configuration supported by SCMI EL3 FW and
+    available for Xen. Each Agent defined as triple consisting of:
+    SCMI agent_id,
+    SMC/HVC function_id assigned for the agent transport ("arm,smc-id"),
+    phandle to SCMI SHM assigned for the agent transport ("arm,scmi-shmem").
+
+As an example:
+
+chosen {
+    xen,scmi-secondary-agents = <
+        1 0x82000003 &scmi_shm_1
+        2 0x82000004 &scmi_shm_2
+        3 0x82000005 &scmi_shm_3
+        4 0x82000006 &scmi_shm_4>;
+}
+
+/{
+        scmi_shm_1: sram@47ff1000 {
+                compatible = "arm,scmi-shmem";
+                reg = <0x0 0x47ff1000 0x0 0x1000>;
+        };
+        scmi_shm_2: sram@47ff2000 {
+                compatible = "arm,scmi-shmem";
+                reg = <0x0 0x47ff2000 0x0 0x1000>;
+        };
+        scmi_shm_3: sram@47ff3000 {
+                compatible = "arm,scmi-shmem";
+                reg = <0x0 0x47ff3000 0x0 0x1000>;
+        };
+        scmi_shm_3: sram@47ff4000 {
+                compatible = "arm,scmi-shmem";
+                reg = <0x0 0x47ff4000 0x0 0x1000>;
+        };
+}
