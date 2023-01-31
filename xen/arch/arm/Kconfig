@@ -287,6 +287,8 @@ config PARTIAL_EMULATION
 	  not been emulated to their complete functionality. Enabling this might
 	  result in unwanted/non-spec compliant behavior.
 
+source "arch/arm/sci/Kconfig"
+
 endmenu
 
 menu "ARM errata workaround via the alternative framework"

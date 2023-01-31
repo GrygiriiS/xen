@@ -1,0 +1,8 @@
+config ARM_SCI
+	bool "Enable ARM_SCI mediators support"
+	depends on ARM
+	default n
+	help
+	  This option enables generic Arm SCI (System Control Interface) mediators
+	  support. It allows domains to control system resourcess via one of
+	  Arm SCI mediators drivers implemented in XEN, like SCMI.
