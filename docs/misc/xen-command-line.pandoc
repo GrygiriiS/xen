@@ -1057,6 +1057,15 @@ affinities to prefer but be not limited to the specified node(s).
 
 Pin dom0 vcpus to their respective pcpus
 
+### dom0_scmi_agent_id (ARM)
+> `= <integer>`
+
+The option is available when `CONFIG_SCMI_SMC_MA` is compiled in, and allows to
+enable SCMI functionality for Dom0 by specifying a non-zero ARM SCMI agent id.
+The SCMI will be disabled for Dom0 if this option is not specified
+(for example, thin Dom0 use-cese).
+The agent ids of domains existing on a single host must be unique.
+
 ### dtuart (ARM)
 > `= path [:options]`
 
