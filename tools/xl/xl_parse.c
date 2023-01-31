@@ -1290,6 +1290,7 @@ static int parse_arm_sci_config(XLU_Config *cfg, libxl_arm_sci *arm_sci,
     enum {
         STATE_OPTION,
         STATE_TYPE,
+        STATE_AGENT_ID,
         STATE_TERMINAL,
     };
     int ret, state = STATE_OPTION;
@@ -1305,6 +1306,8 @@ static int parse_arm_sci_config(XLU_Config *cfg, libxl_arm_sci *arm_sci,
                 *ptr = '\0';
                 if (!strcmp(tok, "type")) {
                     state = STATE_TYPE;
+                } else if (!strcmp(tok, "agent_id")) {
+                    state = STATE_AGENT_ID;
                 } else {
                     fprintf(stderr, "Unknown ARM_SCI option: %s\n", tok);
                     goto parse_error;
@@ -1324,9 +1327,22 @@ static int parse_arm_sci_config(XLU_Config *cfg, libxl_arm_sci *arm_sci,
                 tok = ptr + 1;
             }
             break;
+        case STATE_AGENT_ID:
+            if (*ptr == ',' || *ptr == '\0') {
+                state = *ptr == ',' ? STATE_OPTION : STATE_TERMINAL;
+                *ptr = '\0';
+                arm_sci->agent_id = strtoul(tok, NULL, 0);
+                tok = ptr + 1;
+            }
         default:
             break;
         }
+    }
+
+    if (arm_sci->type == LIBXL_ARM_SCI_TYPE_SCMI_SMC_MULTIAGENT &&
+        arm_sci->agent_id == 0) {
+        fprintf(stderr, "A non-zero ARM_SCI agent_id must be specified\n");
+        goto parse_error;
     }
 
     if (tok != ptr || state != STATE_TERMINAL)
@@ -3042,6 +3058,7 @@ skip_usbdev:
         libxl_arm_sci arm_sci = { 0 };
         if (!parse_arm_sci_config(config, &arm_sci, buf)) {
             b_info->arm_sci.type = arm_sci.type;
+            b_info->arm_sci.agent_id = arm_sci.agent_id;
         } else {
             exit(EXIT_FAILURE);
         }

@@ -3126,6 +3126,21 @@ single SCMI OSPM agent support.
 Should be used together with B<dom0_scmi_smc_passthrough> Xen command line
 option.
 
+=item B<scmi_smc_multiagent>
+
+Enables ARM SCMI SMC multi-agent support for the guest by enabling SCMI over
+SMC calls forwarding from domain to the EL3 firmware (like Trusted Firmware-A)
+with a multi SCMI OSPM agent support. The SCMI B<agent_id> should be
+specified for the guest.
+
+=back
+
+=item B<agent_id=NUMBER>
+
+Specifies a non-zero ARM SCI agent id for the guest. This option is mandatory
+if the SCMI SMC support is enabled for the guest. The agent ids of domains
+existing on a single host must be unique.
+
 =back
 
 =back
