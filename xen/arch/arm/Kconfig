@@ -271,6 +271,15 @@ config PARTIAL_EMULATION
 	  not been emulated to their complete functionality. Enabling this might
 	  result in unwanted/non-spec compliant behavior.
 
+config ARM_SCI
+	bool "Enable ARM_SCI mediators support"
+	depends on ARM
+	default n
+	help
+	  This option enables generic ARM_SCI (System Control Interface) mediators
+	  support. It allows guests to control system resourcess via one of
+	  ARM_SCI mediators implemented in XEN.
+
 endmenu
 
 menu "ARM errata workaround via the alternative framework"

@@ -9,6 +9,9 @@
  */
 
 #include <xen/device_tree.h>
+#include <asm/device.h>
+#include <asm/sci/sci.h>
+#include <xen/access_controller.h>
 #include <xen/errno.h>
 #include <xen/iocap.h>
 #include <xen/lib.h>
@@ -303,6 +306,10 @@ int handle_device(struct domain *d, struct dt_device_node *dev, p2m_type_t p2mt,
                 return res;
             }
         }
+
+        res = ac_assign_dt_device(dev, d);
+        if ( res < 0 )
+            return res;
     }
 
     res = map_device_irqs_to_domain(d, dev, own_device, irq_ranges);

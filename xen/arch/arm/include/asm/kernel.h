@@ -59,11 +59,20 @@ struct kernel_info {
     /* Enable pl011 emulation */
     bool vpl011;
 
+    /* TEE type */
+    uint16_t tee_type;
+
+    /* SCMI type */
+    uint16_t sci_type;
+
     /* Enable/Disable PV drivers interfaces */
     uint16_t dom0less_feature;
 
     /* GIC phandle */
     uint32_t phandle_gic;
+
+    /* SCI SHMEM phandle */
+    uint32_t phandle_sci_shmem;
 
     /* loader to use for this kernel */
     void (*load)(struct kernel_info *info);
