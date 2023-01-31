@@ -318,6 +318,13 @@ int iommu_do_dt_domctl(struct xen_domctl *domctl, struct domain *d,
             break;
         }
 
+        /* TODO: RFC allow assignment of devices without IOMMU protection. */
+        if ( !dt_device_is_protected(dev) )
+        {
+            ret = 0;
+            break;
+        }
+
         ret = iommu_assign_dt_device(d, dev);
 
         if ( ret )

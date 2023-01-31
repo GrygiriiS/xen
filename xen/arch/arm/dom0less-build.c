@@ -14,6 +14,7 @@
 #include <asm/arm64/sve.h>
 #include <asm/dom0less-build.h>
 #include <asm/domain_build.h>
+#include <asm/firmware/sci.h>
 #include <asm/static-memory.h>
 #include <asm/static-shmem.h>
 
@@ -320,6 +321,10 @@ static int __init handle_passthrough_prop(struct kernel_info *kinfo,
                xen_path->data);
         return -EINVAL;
     }
+
+    res = sci_assign_dt_device(kinfo->d, node);
+    if ( res )
+        return res;
 
     res = map_device_irqs_to_domain(kinfo->d, node, true, NULL);
     if ( res < 0 )
@@ -969,6 +974,14 @@ void __init create_domUs(void)
         dt_property_read_string(node, "llc-colors", &llc_colors_str);
         if ( !llc_coloring_enabled && llc_colors_str )
             panic("'llc-colors' found, but LLC coloring is disabled\n");
+
+        /*
+         * TODO: enable ARM SCI for dom0less case
+         * The configuration need to be retrieved from DT
+         *  - arch.arm_sci_type, like "xen,sci_type"
+         *  - arch.arm_sci_agent_id, like "xen,sci_agent_id"
+         */
+        d_cfg.arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_NONE;
 
         /*
          * The variable max_init_domid is initialized with zero, so here it's
