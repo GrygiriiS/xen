@@ -1306,6 +1306,18 @@ static int parse_arm_sci_config(XLU_Config *cfg, libxl_arm_sci *arm_sci,
             }
         }
 
+        if (MATCH_OPTION("agent_id", ptr, oparg)) {
+            unsigned long val = parse_ulong(oparg);
+
+            if (!val || val > 255) {
+                fprintf(stderr, "An invalid ARM_SCI agent_id specified (%u). Valid range [1..255]\n",
+                        val);
+                ret = ERROR_INVAL;
+                goto parse_error;
+            }
+            arm_sci->agent_id = val;
+        }
+
         ptr = strtok(NULL, ",");
     }
 

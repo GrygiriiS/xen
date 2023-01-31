@@ -835,6 +835,17 @@ int __init domu_dt_sci_parse(struct dt_device_node *node,
         d_cfg->arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_NONE;
     else if ( !strcmp(sci_type, "scmi_smc") )
         d_cfg->arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_SCMI_SMC;
+    else if ( !strcmp(sci_type, "scmi_smc_multiagent") )
+    {
+        uint32_t agent_id = 0;
+
+        if ( !dt_property_read_u32(node, "xen,sci_agent_id", &agent_id) ||
+             !agent_id )
+            return -EINVAL;
+
+        d_cfg->arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_SCMI_SMC_MA;
+        d_cfg->arch.arm_sci_agent_id = agent_id;
+    }
     else
     {
         printk(XENLOG_ERR "xen,sci_type in not valid (%s) for domain %s\n",
