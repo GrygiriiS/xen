@@ -1091,6 +1091,15 @@ which serves as Driver domain. The SCMI will be disabled for Dom0/hwdom and
 SCMI nodes removed from Dom0/hwdom device tree.
 (for example, thin Dom0 with Driver domain use-case).
 
+### dom0_scmi_agent_id (ARM)
+> `= <integer>`
+
+The option is available when `CONFIG_SCMI_SMC_MA` is compiled in, and allows to
+enable SCMI functionality for Dom0 by specifying a non-zero ARM SCMI agent id.
+The SCMI will be disabled for Dom0 if this option is not specified
+(for example, thin Dom0 or dom0less use-cases).
+The agent ids of domains existing on a single host must be unique.
+
 ### dtuart (ARM)
 > `= path [:options]`
 
