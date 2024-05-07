@@ -2038,8 +2038,11 @@ int __init construct_domain(struct domain *d, struct kernel_info *kinfo)
     return 0;
 }
 
+#include <asm/static-memory.h>
+
 static int __init construct_dom0(struct domain *d)
 {
+    const struct dt_device_node *chosen = dt_find_node_by_path("/chosen");
     struct kernel_info kinfo = {};
     int rc;
 
@@ -2073,7 +2076,12 @@ static int __init construct_dom0(struct domain *d)
     /* type must be set before allocate_memory */
     d->arch.type = kinfo.type;
 #endif
-    allocate_memory_11(d, &kinfo);
+
+    if ( !dt_find_property(chosen, "xen,static-mem", NULL) )
+        allocate_memory_11(d, &kinfo);
+    else
+        assign_static_memory_11(d, &kinfo, chosen);
+
     find_gnttab_region(d, &kinfo);
 
     rc = process_shm_chosen(d, &kinfo);

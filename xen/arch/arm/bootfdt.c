@@ -366,7 +366,21 @@ static int __init process_chosen_node(const void *fdt, int node,
         bootinfo.static_heap = true;
     }
 
-    printk("Checking for initrd in /chosen\n");
+    if ( fdt_get_property(fdt, node, "xen,static-mem", NULL) )
+    {
+        int rc;
+
+        printk("Checking for static static-mem in /chosen\n");
+
+        rc = device_tree_get_meminfo(fdt, node, "xen,static-mem",
+                                     address_cells, size_cells,
+                                     &bootinfo.reserved_mem,
+                                     MEMBANK_STATIC_DOMAIN);
+        if ( rc )
+            return rc;
+    }
+
+    printk(XENLOG_ERR"Checking for initrd in /chosen\n");
 
     prop = fdt_get_property(fdt, node, "linux,initrd-start", &len);
     if ( !prop )
