@@ -6,3 +6,27 @@ config ARM_SCI
 	  This option enables generic Arm SCI (System Control Interface) mediators
 	  support. It allows domains to control system resourcess via one of
 	  Arm SCI mediators drivers implemented in XEN, like SCMI.
+
+if ARM_SCI
+
+choice
+	prompt "ARM_SCI mediator type"
+	default SCMI_SMC_DOM0
+	help
+	Choose which ARM_SCI mediator to enable.
+
+	If unsure, choose SCMI_SMC_DOM0.
+
+config SCMI_SMC_DOM0
+	bool "Enable forwarding SCMI over SMC calls from Dom0 to EL3 firmware"
+	default y
+	help
+	  This option enables basic awareness for SCMI calls using SMC as
+	  doorbell mechanism and Shared Memory for transport ("arm,scmi-smc"
+	  compatible only). The value of "arm,smc-id" DT property from SCMI
+	  firmware node is used to trap and forward corresponding SCMI SMCs
+	  to firmware running at EL3, if the call comes from Dom0.
+
+endchoice
+
+endif
