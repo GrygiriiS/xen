@@ -2208,7 +2208,6 @@ int xc_domain_soft_reset(xc_interface *xch,
     return do_domctl(xch, &domctl);
 }
 
-<<<<<<< HEAD
 int xc_domain_setrproc(xc_interface *xch,
                        uint32_t domid,
                        uint32_t chan_id)
