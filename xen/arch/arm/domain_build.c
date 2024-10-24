@@ -1773,14 +1773,16 @@ static int __init handle_node(struct domain *d, struct kernel_info *kinfo,
         evtchn_allocate(d);
 
 #ifdef CONFIG_SCMI_SMC
-        res = scmi_dt_make_shmem_node(kinfo);
-        if ( res )
-            return res;
+        if (sci_get_type() != XEN_DOMCTL_CONFIG_ARM_SCI_NONE) {
+			res = scmi_dt_make_shmem_node(kinfo);
+			if ( res )
+				return res;
 
-        res = mem_permit_access(kinfo->d, kinfo->d->arch.sci_channel.paddr,
-                                PAGE_SIZE);
-        if ( res )
-            return res;
+			res = mem_permit_access(kinfo->d, kinfo->d->arch.sci_channel.paddr,
+									PAGE_SIZE);
+			if ( res )
+				return res;
+        }
 #endif
         /*
          * The hypervisor node should always be created after all nodes
@@ -1821,11 +1823,13 @@ static int __init handle_node(struct domain *d, struct kernel_info *kinfo,
     }
 
 #ifdef CONFIG_SCMI_SMC
+    if (sci_get_type() != XEN_DOMCTL_CONFIG_ARM_SCI_NONE) {
     if ( dt_match_node(scmi_matches, node) )
     {
         res = scmi_dt_set_phandle(kinfo, dt_node_full_name(node));
         if ( res )
             return res;
+    }
     }
 #endif
 
