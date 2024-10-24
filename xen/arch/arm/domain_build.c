@@ -1600,7 +1600,7 @@ static int __init mem_permit_access(struct domain *d, uint64_t addr, uint64_t le
     if ( res )
         return res;
 
-    res = map_regions_p2mt(d, gaddr_to_gfn(addr), PFN_DOWN(len),
+    res = map_mmio_regions(d, gaddr_to_gfn(addr), PFN_DOWN(len),
             maddr_to_mfn(addr), p2m_mmio_direct_nc);
     if ( res )
     {
