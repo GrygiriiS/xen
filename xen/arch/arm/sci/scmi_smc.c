@@ -742,6 +742,8 @@ static int scmi_relinquish_resources(struct domain *d)
     if ( !d->arch.sci )
         return 0;
 
+    return 0;
+
     agent_channel = d->arch.sci;
 
     spin_lock(&agent_channel->lock);
