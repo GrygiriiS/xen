@@ -59,6 +59,11 @@ struct paging_domain {
     unsigned long p2m_total_pages;
 };
 
+struct sci_channel {
+    uint32_t guest_func_id;
+    uint64_t paddr;
+};
+
 struct arch_domain
 {
 #ifdef CONFIG_ARM_64
@@ -122,6 +127,7 @@ struct arch_domain
     bool sci_enabled;
     /* ARM SCI driver's specific data */
     void *sci_data;
+    struct sci_channel sci_channel;
 #endif
 
 }  __cacheline_aligned;

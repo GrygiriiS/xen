@@ -469,6 +469,10 @@ typedef uint64_t xen_callback_t;
 #define GUEST_PL011_BASE    xen_mk_ullong(0x22000000)
 #define GUEST_PL011_SIZE    xen_mk_ullong(0x00001000)
 
+/* SCI mediator */
+#define GUEST_SCI_SHMEM_BASE xen_mk_ullong(0x22001000)
+#define GUEST_SCI_SHMEM_SIZE xen_mk_ullong(0x01000)
+
 /* Guest PCI-PCIe memory space where config space and BAR will be available.*/
 #define GUEST_VPCI_ADDR_TYPE_MEM            xen_mk_ullong(0x02000000)
 #define GUEST_VPCI_MEM_ADDR                 xen_mk_ullong(0x23000000)
