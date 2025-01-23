@@ -664,6 +664,8 @@ static int scmi_domain_init(struct domain *d,
 
     d->arch.sci_data = channel;
     d->arch.sci_enabled = true;
+    d->arch.sci_channel.paddr = channel->paddr;
+    d->arch.sci_channel.guest_func_id = channel->func_id;
 
     return 0;
 
