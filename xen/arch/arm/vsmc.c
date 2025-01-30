@@ -21,7 +21,6 @@
 #include <asm/traps.h>
 #include <asm/vpsci.h>
 #include <asm/platform.h>
-#include <asm/firmware/scmi-smc.h>
 
 /* Number of functions currently supported by Hypervisor Service. */
 #define XEN_SMCCC_FUNCTION_COUNT 3
@@ -233,7 +232,7 @@ static bool handle_sip(struct cpu_user_regs *regs)
     if ( platform_smc(regs) )
         return true;
 
-    return scmi_handle_smc(regs);
+    return sci_handle_call(regs);
 }
 
 /*
@@ -301,8 +300,6 @@ static bool vsmccc_handle_call(struct cpu_user_regs *regs)
             break;
         case ARM_SMCCC_OWNER_SIP:
             handled = handle_sip(regs);
-            if ( !handled )
-                handled = sci_handle_call(regs);
             break;
         case ARM_SMCCC_OWNER_TRUSTED_APP ... ARM_SMCCC_OWNER_TRUSTED_APP_END:
         case ARM_SMCCC_OWNER_TRUSTED_OS ... ARM_SMCCC_OWNER_TRUSTED_OS_END:
