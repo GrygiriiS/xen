@@ -317,13 +317,23 @@ int iommu_do_dt_domctl(struct xen_domctl *domctl, struct domain *d,
                    dt_node_full_name(dev));
             break;
         }
+        else if ( !ret )
+        {
+            ret = iommu_assign_dt_device(d, dev);
 
-        ret = iommu_assign_dt_device(d, dev);
-
-        if ( ret )
-            printk(XENLOG_G_ERR "XEN_DOMCTL_assign_dt_device: assign \"%s\""
-                   " to dom%u failed (%d)\n",
+            if ( ret )
+                printk(XENLOG_G_ERR "XEN_DOMCTL_assign_dt_device: assign \"%s\""
+                                    " to dom%u failed (%d)\n",
+                       dt_node_full_name(dev), d->domain_id, ret);
+        }
+        else
+        {
+            printk(XENLOG_G_ERR "XEN_DOMCTL_assign_device: assign \"%s\""
+                                " to dom%u failed (%d)\n",
                    dt_node_full_name(dev), d->domain_id, ret);
+            ret = 0;
+            break;
+        }
         break;
 
     case XEN_DOMCTL_deassign_device:
