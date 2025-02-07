@@ -1284,6 +1284,63 @@ out:
     if (rc) exit(EXIT_FAILURE);
 }
 
+static int parse_arm_sci_config(XLU_Config *cfg, libxl_arm_sci *arm_sci,
+                                const char *str)
+{
+    enum {
+        STATE_OPTION,
+        STATE_TYPE,
+        STATE_TERMINAL,
+    };
+    int ret, state = STATE_OPTION;
+    char *buf2, *tok, *ptr, *end;
+
+    if (NULL == (buf2 = ptr = strdup(str)))
+        return ERROR_NOMEM;
+
+    for (tok = ptr, end = ptr + strlen(ptr) + 1; ptr < end; ptr++) {
+        switch(state) {
+        case STATE_OPTION:
+            if (*ptr == '=') {
+                *ptr = '\0';
+                if (!strcmp(tok, "type")) {
+                    state = STATE_TYPE;
+                } else {
+                    fprintf(stderr, "Unknown ARM_SCI option: %s\n", tok);
+                    goto parse_error;
+                }
+                tok = ptr + 1;
+            }
+            break;
+        case STATE_TYPE:
+            if (*ptr == '\0' || *ptr == ',') {
+                state = *ptr == ',' ? STATE_OPTION : STATE_TERMINAL;
+                *ptr = '\0';
+                ret = libxl_arm_sci_type_from_string(tok, &arm_sci->type);
+                if (ret) {
+                    fprintf(stderr, "Unknown ARM_SCI type: %s\n", tok);
+                    goto parse_error;
+                }
+                tok = ptr + 1;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    if (tok != ptr || state != STATE_TERMINAL)
+        goto parse_error;
+
+    free(buf2);
+
+    return 0;
+
+parse_error:
+    free(buf2);
+    return ERROR_INVAL;
+}
+
 void parse_config_data(const char *config_source,
                        const char *config_data,
                        int config_len,
@@ -2980,6 +3037,15 @@ skip_usbdev:
 
     if (!xlu_cfg_get_long (config, "nr_spis", &l, 0))
         b_info->arch_arm.nr_spis = l;
+
+    if (!xlu_cfg_get_string(config, "arm_sci", &buf, 1)) {
+        libxl_arm_sci arm_sci = { 0 };
+        if (!parse_arm_sci_config(config, &arm_sci, buf)) {
+            b_info->arm_sci.type = arm_sci.type;
+        } else {
+            exit(EXIT_FAILURE);
+        }
+    }
 
     parse_vkb_list(config, d_config);
 
