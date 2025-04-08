@@ -135,11 +135,19 @@ int sci_do_domctl(struct xen_domctl *domctl, struct domain *d,
     switch ( domctl->cmd )
     {
     case XEN_DOMCTL_assign_device:
+        ret = -EOPNOTSUPP;
         if ( domctl->u.assign_device.dev != XEN_DOMCTL_DEV_DT )
-        {
-            ret = -EINVAL;
+            /*
+             * do not fail here as call is chained with iommu handling and
+             * XEN_DOMCTL_DEV_PCI is not case to handle
+             */
             break;
-        }
+
+        if ( !cur_mediator )
+            break;
+
+        if ( !cur_mediator->assign_dt_device )
+            break;
 
         ret = dt_find_node_by_gpath(domctl->u.assign_device.u.dt.path,
                                     domctl->u.assign_device.u.dt.size, &dev);
