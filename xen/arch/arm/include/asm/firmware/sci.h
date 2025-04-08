@@ -146,6 +146,14 @@ int sci_dt_finalize(struct domain *d, void *fdt);
  * control" functionality.
  */
 int sci_assign_dt_device(struct domain *d, struct dt_device_node *dev);
+
+/*
+ * SCI domctl handler
+ *
+ * Only XEN_DOMCTL_assign_device is handled for now.
+ */
+int sci_do_domctl(struct xen_domctl *domctl, struct domain *d,
+                  XEN_GUEST_HANDLE_PARAM(xen_domctl_t) u_domctl);
 #else
 
 static inline bool sci_domain_is_enabled(struct domain *d)
@@ -191,6 +199,12 @@ static inline int sci_dt_finalize(struct domain *d, void *fdt)
 
 static inline int sci_assign_dt_device(struct domain *d,
                                        struct dt_device_node *dev)
+{
+    return 0;
+}
+
+static inline int sci_do_domctl(struct xen_domctl *domctl, struct domain *d,
+                                XEN_GUEST_HANDLE_PARAM(xen_domctl_t) u_domctl)
 {
     return 0;
 }
