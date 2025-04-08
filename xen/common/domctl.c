@@ -27,6 +27,7 @@
 #include <xen/vm_event.h>
 #include <xen/monitor.h>
 #include <asm/current.h>
+#include <asm/firmware/sci.h>
 #include <asm/irq.h>
 #include <asm/page.h>
 #include <asm/p2m.h>
@@ -851,6 +852,24 @@ long do_domctl(XEN_GUEST_HANDLE_PARAM(xen_domctl_t) u_domctl)
     case XEN_DOMCTL_deassign_device:
     case XEN_DOMCTL_get_device_group:
         ret = iommu_do_domctl(op, d, u_domctl);
+
+        if ( !ret || ret == -EOPNOTSUPP )
+        {
+            int ret1;
+            /*
+             * Add chained handling of assigned DT devices to support
+             * access-controller functionality through SCI framework, so
+             * DT device assign request can be passed to FW for processing and
+             * enabling VM access to requested device.
+             * The access-controller DT device processing is chained after IOMMU
+             * processing and expected to be executed for any DT device
+             * regardless if DT device is protected by IOMMU or not (or IOMMU
+             * is disabled).
+             */
+            ret1 = sci_do_domctl(op, d, u_domctl);
+            if ( ret1 != -EOPNOTSUPP )
+                ret = ret1;
+        }
         break;
 
     case XEN_DOMCTL_get_paging_mempool_size:
