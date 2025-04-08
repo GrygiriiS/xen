@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Generic part of the SCI (System Control Interface) subsystem.
  *
@@ -167,7 +167,7 @@ static int __init sci_init(void)
 
     dt_for_each_device_node(dt_host, np)
     {
-        rc = device_init(np, DEVICE_ARM_SCI, NULL);
+        rc = device_init(np, DEVICE_FIRMWARE, NULL);
         if ( !rc && num_sci )
         {
             printk(XENLOG_ERR

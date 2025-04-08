@@ -27,7 +27,6 @@
 #include <xen/vm_event.h>
 #include <xen/monitor.h>
 #include <asm/current.h>
-#include <asm/firmware/sci.h>
 #include <asm/irq.h>
 #include <asm/page.h>
 #include <asm/p2m.h>
@@ -852,18 +851,6 @@ long do_domctl(XEN_GUEST_HANDLE_PARAM(xen_domctl_t) u_domctl)
     case XEN_DOMCTL_deassign_device:
     case XEN_DOMCTL_get_device_group:
         ret = iommu_do_domctl(op, d, u_domctl);
-
-        if ( ret >= 0 || (ret == -EOPNOTSUPP) || (ret == -ENODEV) )
-        {
-            /*
-             * TODO: RFC
-             * This change will allow to pass DT nodes/devices to
-             * XEN_DOMCTL_assign_device OP using xl.cfg:"dtdev" property even
-             * if those DT nodes/devices even are not behind IOMMU (or IOMMU
-             * is disabled) without failure.
-             */
-            ret = sci_do_domctl(op, d, u_domctl);
-        }
         break;
 
     case XEN_DOMCTL_get_paging_mempool_size:
