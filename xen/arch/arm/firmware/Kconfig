@@ -10,7 +10,7 @@ menu "Firmware Drivers"
 
 choice
 	prompt "ARM SCI driver type"
-	default ARM_SCI_NONE
+	default SCMI_SMC
 	help
 	Choose which ARM SCI driver to enable.
 

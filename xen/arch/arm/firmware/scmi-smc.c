@@ -153,7 +153,7 @@ static const struct dt_device_match scmi_smc_match[] __initconst = {
     { /* sentinel */ },
 };
 
-DT_DEVICE_START(gicv3, "SCMI SMC DOM0", DEVICE_ARM_SCI)
+DT_DEVICE_START(scmi_smc, "SCMI SMC DOM0", DEVICE_FIRMWARE)
     .dt_match = scmi_smc_match,
     .init = scmi_dom0_init,
 DT_DEVICE_END
