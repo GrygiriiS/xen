@@ -3092,10 +3092,6 @@ Otherwise, the value specified by the `nr_spis` parameter will be used.
 The number of SPIs should match the highest interrupt ID that will be
 assigned to the domain.
 
-=back
-
-=over 4
-
 =item B<arm_sci="ARM_SCI_STRING">
 
 Set ARM_SCI specific options for the guest. ARM SCI is System
@@ -3125,6 +3121,8 @@ forwarding from domain to the EL3 firmware (like Trusted Firmware-A) with a
 single SCMI OSPM agent support.
 Should be used together with B<dom0_scmi_smc_passthrough> Xen command line
 option.
+
+=back
 
 =back
 

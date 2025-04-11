@@ -28,7 +28,7 @@ static bool __ro_after_init opt_dom0_scmi_smc_passthrough = false;
 boolean_param("dom0_scmi_smc_passthrough", opt_dom0_scmi_smc_passthrough);
 
 static uint32_t __ro_after_init scmi_smc_id;
-static struct domain *scmi_dom;
+static struct domain __read_mostly *scmi_dom;
 
 /*
  * Check if provided SMC Function Identifier matches the one known by the SCMI
@@ -81,14 +81,38 @@ static bool scmi_handle_smc(struct cpu_user_regs *regs)
     return true;
 }
 
+static int
+scmi_smc_domain_sanitise_config(struct xen_domctl_createdomain *config)
+{
+    if ( config->arch.arm_sci_type != XEN_DOMCTL_CONFIG_ARM_SCI_NONE &&
+         config->arch.arm_sci_type != XEN_DOMCTL_CONFIG_ARM_SCI_SCMI_SMC )
+        return -EINVAL;
+
+    return 0;
+}
+
 static int scmi_smc_domain_init(struct domain *d,
                                 struct xen_domctl_createdomain *config)
 {
+    /*
+     * scmi_passthrough is not enabled:
+     * - proceed only for hw_domain
+     * - fail if guest domain has SCMI enabled.
+     */
     if ( !opt_dom0_scmi_smc_passthrough && !is_hardware_domain(d) )
-        return 0;
-
+    {
+        if ( config->arch.arm_sci_type == XEN_DOMCTL_CONFIG_ARM_SCI_SCMI_SMC )
+            return -EINVAL;
+        else
+            return 0;
+    }
+    /*
+     * scmi_passthrough is enabled:
+     * - ignore hw_domain
+     * - proceed only for domain with SCMI enabled.
+     */
     if ( opt_dom0_scmi_smc_passthrough &&
-         (config->arch.arm_sci_type != XEN_DOMCTL_CONFIG_ARM_SCI_SCMI_SMC ||
+         (config->arch.arm_sci_type == XEN_DOMCTL_CONFIG_ARM_SCI_NONE ||
           is_hardware_domain(d)) )
         return 0;
 
@@ -114,8 +138,12 @@ static void scmi_smc_domain_destroy(struct domain *d)
 /*
  * Handle Dom0 SCMI SMC specific DT nodes
  *
- * Copy SCMI nodes into Dom0 device tree if dom0_scmi_smc_passthrough=false.
- *
+ * if dom0_scmi_smc_passthrough=false:
+ * - Copy SCMI nodes into Dom0 device tree.
+ * if dom0_scmi_smc_passthrough=true:
+ * - skip SCMI nodes from Dom0 DT
+ * - give dom0 control access to SCMI shmem MMIO, so SCMI can be passed
+ *   through to guest.
  */
 static bool scmi_smc_dt_handle_node(struct domain *d,
                                     struct dt_device_node *node)
@@ -129,12 +157,17 @@ static bool scmi_smc_dt_handle_node(struct domain *d,
         { /* sentinel */ },
     };
 
+    /* skip scmi shmem node for dom0 if scmi not enabled */
     if ( dt_match_node(shmem_matches, node) && !sci_domain_is_enabled(d) )
     {
-        dt_dprintk("  Skip scmi shmem node\n");
+        dt_dprintk("Skip scmi shmem node\n");
         return true;
     }
 
+    /*
+     * skip scmi node for dom0 if scmi not enabled, but give dom0 control
+     * access to SCMI shmem
+     */
     if ( dt_match_node(scmi_matches, node) && !sci_domain_is_enabled(d) )
     {
         struct dt_device_node *shmem_node;
@@ -142,8 +175,7 @@ static bool scmi_smc_dt_handle_node(struct domain *d,
         u64 paddr, size;
         int ret;
 
-        dt_dprintk("  Skip scmi node\n");
-
+        /* give dom0 control access to SCMI shmem */
         prop = dt_get_property(node, "shmem", NULL);
         if ( !prop )
             return true;
@@ -159,6 +191,7 @@ static bool scmi_smc_dt_handle_node(struct domain *d,
         ret = iomem_permit_access(d, paddr_to_pfn(paddr),
                                   paddr_to_pfn(paddr + size - 1));
 
+        dt_dprintk("Skip scmi node\n");
         return true;
     }
 
@@ -179,6 +212,7 @@ static int __init scmi_check_smccc_ver(void)
 
 static const struct sci_mediator_ops scmi_smc_ops = {
     .handle_call = scmi_handle_smc,
+    .domain_sanitise_config = scmi_smc_domain_sanitise_config,
     .domain_init = scmi_smc_domain_init,
     .domain_destroy = scmi_smc_domain_destroy,
     .dom0_dt_handle_node = scmi_smc_dt_handle_node,
