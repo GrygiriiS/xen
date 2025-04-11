@@ -222,7 +222,7 @@ int libxl__arch_domain_prepare_config(libxl__gc *gc,
         config->arch.sve_vl = d_config->b_info.arch_arm.sve_vl / 128U;
     }
 
-    switch (d_config->b_info.arm_sci.type) {
+    switch (d_config->b_info.arch_arm.arm_sci.type) {
     case LIBXL_ARM_SCI_TYPE_NONE:
         config->arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_NONE;
         break;
@@ -231,9 +231,10 @@ int libxl__arch_domain_prepare_config(libxl__gc *gc,
         break;
     default:
         LOG(ERROR, "Unknown ARM_SCI type %d",
-            d_config->b_info.arm_sci.type);
+            d_config->b_info.arch_arm.arm_sci.type);
         return ERROR_FAIL;
     }
+    LOG(DEBUG, " - SCI type=%u", config->arch.arm_sci_type);
 
     return 0;
 }
