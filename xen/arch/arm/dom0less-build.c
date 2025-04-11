@@ -815,6 +815,36 @@ static int __init construct_domU(struct domain *d,
     return rc;
 }
 
+int __init domu_dt_sci_parse(struct dt_device_node *node,
+                             struct xen_domctl_createdomain *d_cfg)
+{
+    const char *sci_type = NULL;
+    int ret;
+
+    d_cfg->arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_NONE;
+
+    if ( !IS_ENABLED(CONFIG_ARM_SCI) ||
+         !dt_property_read_bool(node, "xen,sci_type") )
+        return 0;
+
+    ret = dt_property_read_string(node, "xen,sci_type", &sci_type);
+    if ( ret )
+        return ret;
+
+    if ( !strcmp(sci_type, "none") )
+        d_cfg->arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_NONE;
+    else if ( !strcmp(sci_type, "scmi_smc") )
+        d_cfg->arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_SCMI_SMC;
+    else
+    {
+        printk(XENLOG_ERR "xen,sci_type in not valid (%s) for domain %s\n",
+               sci_type, dt_node_name(node));
+        return -EINVAL;
+    }
+
+    return 0;
+}
+
 void __init create_domUs(void)
 {
     struct dt_device_node *node;
@@ -975,13 +1005,8 @@ void __init create_domUs(void)
         if ( !llc_coloring_enabled && llc_colors_str )
             panic("'llc-colors' found, but LLC coloring is disabled\n");
 
-        /*
-         * TODO: enable ARM SCI for dom0less case
-         * The configuration need to be retrieved from DT
-         *  - arch.arm_sci_type, like "xen,sci_type"
-         *  - arch.arm_sci_agent_id, like "xen,sci_agent_id"
-         */
-        d_cfg.arch.arm_sci_type = XEN_DOMCTL_CONFIG_ARM_SCI_NONE;
+        if ( domu_dt_sci_parse(node, &d_cfg) )
+            panic("Error getting SCI configuration\n");
 
         /*
          * The variable max_init_domid is initialized with zero, so here it's
