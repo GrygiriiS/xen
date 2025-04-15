@@ -296,6 +296,20 @@ with the following properties:
     Should be used together with dom0_scmi_smc_passthrough Xen command line
     option.
 
+    - "scmi_smc_multiagent"
+
+    Enables ARM SCMI SMC multi-agent support for the guest by enabling SCMI over
+    SMC calls forwarding from domain to the EL3 firmware (like ARM
+    Trusted Firmware-A) with a multi SCMI OSPM agent support.
+    The SCMI agent_id should be specified for the guest with "xen,sci_agent_id"
+    property.
+
+- "xen,sci_agent_id"
+
+    Specifies a non-zero ARM SCI agent id for the guest. This option is
+    mandatory if the SCMI SMC "scmi_smc_multiagent" support is enabled for
+    the guest. The agent ids of guest must be unique and in the range [1..255].
+
 Under the "xen,domain" compatible node, one or more sub-nodes are present
 for the DomU kernel and ramdisk.
 

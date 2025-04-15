@@ -3135,9 +3135,7 @@ specified for the guest.
 
 Specifies a non-zero ARM SCI agent id for the guest. This option is mandatory
 if the SCMI SMC support is enabled for the guest. The agent ids of domains
-existing on a single host must be unique.
-
-=back
+existing on a single host must be unique and in the range [1..255].
 
 =back
 
